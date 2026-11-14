@@ -45,3 +45,5 @@ Anyone receiving this image, or using the service over a network, can get the so
 - 2026-11-13: Repair staff submission attributes for Rails HTML validation; read multipart email bodies and current download controls in system tests. Pin native CI runners to Ubuntu 24.04 and apply existing Ruby/ERB style checks to the Bennett layer, retaining standalone Minitest assertions and fixture complexity exemptions.
 
 - 2026-11-13: Fit readonly JUD client FullName text within its existing field rectangle when two printed names are long, preserving the font size for names that already fit and retaining ordinary document rendering.
+
+- 2026-11-14: Server-rendered signature previews honor each field's signature-ID preference, matching the signer component and generated PDF. Preview containers bound legacy signature details to the field rectangle. Existing signed PDFs, document IDs, audit trails and account settings are unchanged.
