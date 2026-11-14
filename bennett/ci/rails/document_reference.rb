@@ -115,7 +115,11 @@ class BennettReferenceFixture
       shared = build(language, client_name: long_names)
       preview = Submissions::GeneratePreviewAttachments.call(shared).first
       result = Submissions::GenerateResultAttachments.generate_pdfs(shared.submitters.first).values.first
-      [HexaPDF::Document.new(io: StringIO.new(preview.download)), result].each do |pdf|
+      # Embedded font encodings are finalized when the result is serialized.
+      result_io = StringIO.new
+      result.write(result_io)
+      [HexaPDF::Document.new(io: StringIO.new(preview.download)),
+       HexaPDF::Document.new(io: StringIO.new(result_io.string))].each do |pdf|
         reader = BennettReferenceText.new
         pdf.pages[1].process_contents(reader)
         name = reader.items.find { |item| item[0] == long_names }
