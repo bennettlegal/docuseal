@@ -31,6 +31,9 @@ check.call(flows.size == 4, 'four completed flows')
 references = []
 root_pem = Account.first!.encrypted_configs.find_by!(key: EncryptedConfig::ESIGN_CERTS_KEY).value.fetch('root_ca')
 trusted_root = OpenSSL::X509::Certificate.new(root_pem)
+trust_store = OpenSSL::X509::Store.new
+trust_store.purpose = OpenSSL::X509::PURPOSE_SMIME_SIGN
+trust_store.add_cert(trusted_root)
 flows.each do |flow|
   submission = Submission.find(flow.fetch('submission_id'))
   check.call(submission.variables['bennett_issuance_id'] == flow.fetch('issuance_id'), 'issuance binding')
@@ -81,7 +84,12 @@ flows.each do |flow|
           pkcs = OpenSSL::PKCS7.new(signature.contents)
           check.call(pkcs.certificates.all? { |cert| cert.serial.to_i.positive? && cert.serial.num_bits <= 159 },
                      'all certificate serials fit the positive 20-octet DER limit')
-          check.call(signature.verify(default_paths: false, trusted_certs: [trusted_root]).success?,
+          check.call(signature.signature_type == 'adbe.pkcs7.detached' && pkcs.signers.size == 1,
+                     'one detached CMS signer')
+          # HexaPDF's timestamp probe strips genuine trailing zero bytes from DER.
+          # Verify the original detached CMS and byte ranges without trimming them.
+          check.call(pkcs.verify(pkcs.certificates, trust_store, signature.signed_data,
+                                 OpenSSL::PKCS7::DETACHED | OpenSSL::PKCS7::BINARY),
                      'cryptographic signature and pinned CI certificate chain verify')
           check.call(signature[:ByteRange].to_a.last(2).sum == bytes.bytesize, 'digital seal covers the full result')
         end
