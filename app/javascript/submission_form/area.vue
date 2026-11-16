@@ -73,37 +73,39 @@
     >
     <div
       v-else-if="field.type === 'signature' && signature"
-      class="flex justify-between h-full gap-1 overflow-hidden w-full"
+      class="flex justify-between h-full overflow-hidden w-full"
       :class="isNarrow && (isShowSignatureId || field.preferences?.reason_field_uuid) ? 'flex-row' : 'flex-col'"
     >
       <div
-        class="flex overflow-hidden"
-        :class="isNarrow && (isShowSignatureId || field.preferences?.reason_field_uuid) ? 'w-1/2' : 'flex-grow'"
-        style="min-height: 50%"
+        class="flex min-w-0 min-h-0 overflow-hidden"
+        :class="(isShowSignatureId || field.preferences?.reason_field_uuid) ? (isNarrow ? 'w-1/2 h-full' : 'w-full h-1/2') : 'flex-grow'"
       >
         <img
-          class="object-contain mx-auto"
+          class="object-contain mx-auto w-full h-full"
           :src="signature.url"
         >
       </div>
-      <div
+      <signature-details
         v-if="isShowSignatureId || field.preferences?.reason_field_uuid"
-        class="text-[1vw] lg:text-[0.55rem] lg:leading-[0.65rem]"
-        :class="isNarrow ? 'w-1/2' : 'w-full'"
+        class="block min-w-0 min-h-0 overflow-hidden"
+        :class="isNarrow ? 'w-1/2 h-full' : 'w-full h-1/2'"
+        style="font-size: 55.5556%; line-height: 1.1; padding: 1px; box-sizing: border-box"
       >
-        <div class="truncate uppercase">
-          ID: {{ signature.uuid }}
+        <div style="overflow-wrap: anywhere">
+          <div class="uppercase">
+            ID: {{ signature.uuid }}
+          </div>
+          <div>
+            <span v-if="values[field.preferences?.reason_field_uuid]">{{ t('reason') }}: </span>{{ values[field.preferences?.reason_field_uuid] || t('digitally_signed_by') }} {{ submitter.name }}
+            <template v-if="submitter.email">
+              <div>&lt;{{ submitter.email }}&gt;</div>
+            </template>
+          </div>
+          <div>
+            {{ new Date(signature.created_at).toLocaleString(undefined, { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', timeZoneName: 'short' }) }}
+          </div>
         </div>
-        <div>
-          <span v-if="values[field.preferences?.reason_field_uuid]">{{ t('reason') }}: </span>{{ values[field.preferences?.reason_field_uuid] || t('digitally_signed_by') }} {{ submitter.name }}
-          <template v-if="submitter.email">
-            &lt;{{ submitter.email }}&gt;
-          </template>
-        </div>
-        <div>
-          {{ new Date(signature.created_at).toLocaleString(undefined, { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', timeZoneName: 'short' }) }}
-        </div>
-      </div>
+      </signature-details>
     </div>
     <img
       v-else-if="field.type === 'initials' && initials"
