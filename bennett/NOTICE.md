@@ -38,6 +38,8 @@ Each change is a normal commit on `bennett-legal`; `git log upstream/master..ben
 
 - **Signer dispatch after commit** (2026-11-13). Completion jobs, delegated/API invitations, decline mail, and signer webhook/reindex dispatch wait for all enclosing database transactions to commit. Rolled-back actions publish no such work, including helper dispatch using Sidekiq bulk APIs. Native job arguments and delivery preferences are retained.
 
+- **JUD client completed copies** (2026-11-16). A verified, completed JUD client receives the final signed document copy even when the initial native invitation was suppressed because JUD supplied the signing link. Account and template copy settings remain authoritative; ordinary recipient opt-outs, separate staff context, invitation behavior and existing signed document bytes are preserved.
+
 ## Source availability
 
 Anyone receiving this image, or using the service over a network, can get the source from the public fork at the commit in the image label. Keep that fork public and keep every published image's commit reachable there (the nightly workflow tags each published commit `verified-<date>-<commit>`).

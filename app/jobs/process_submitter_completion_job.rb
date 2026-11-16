@@ -166,18 +166,31 @@ class ProcessSubmitterCompletionJob
   end
 
   def enqueue_copy_emails(submitter, configs)
-    to = submitter.submission.submitters.reject { |e| e.preferences['send_email'] == false }
-                  .sort_by { |e| e.completed_at || Time.current }.select(&:email?).map(&:friendly_name)
+    submission = submitter.submission
+    jud_context = BennettJudEmailContext.for_submission(submission)
+
+    # JUD's first email supplies the signing link, so the client invitation is
+    # suppressed. That suppression must not also suppress their final signed copy.
+    recipients = submission.submitters.reject do |recipient|
+      recipient.preferences['send_email'] == false && !completed_jud_client?(recipient, submission, jud_context)
+    end
+    to = recipients.sort_by { |e| e.completed_at || Time.current }.select(&:email?).map(&:friendly_name)
 
     return if to.blank?
 
     # Bennett Legal, 2026-11-10: render a separate signed copy per recipient so
     # staff can receive JUD context without putting it in the client's email.
-    if configs.value['bcc_recipients'] == true || BennettJudEmailContext.for_submission(submitter.submission)
+    if configs.value['bcc_recipients'] == true || jud_context
       to.each { |to| SubmitterMailer.documents_copy_email(submitter, to:).deliver_later! }
     else
       SubmitterMailer.documents_copy_email(submitter, to: to.join(', ')).deliver_later!
     end
+  end
+
+  def completed_jud_client?(recipient, submission, jud_context)
+    jud_context && recipient.uuid == submission.template_submitters.first['uuid'] &&
+      recipient.external_id == "#{submission.variables['bennett_issuance_id']}:0" &&
+      recipient.completed_at? && !recipient.declined_at? && !recipient.viewer?
   end
 
   def build_bcc_addresses(submission)
