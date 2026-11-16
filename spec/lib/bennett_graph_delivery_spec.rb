@@ -152,7 +152,7 @@ RSpec.describe BennettGraphDelivery do
   end
 
   it 'holds invitation, verification and completion-mail jobs in the Dead set on uncertain sends' do
-    [SendSubmitterInvitationEmailJob, SendSubmitterVerificationEmailJob, BennettMailDeliveryJob].each do |job|
+    [SendSubmitterInvitationEmailJob, SendSubmitterVerificationEmailJob, ActionMailer::MailDeliveryJob].each do |job|
       expect(job.sidekiq_retry_in_block.call(0, described_class::UncertainDelivery.new)).to eq(:kill)
       expect(job.sidekiq_retry_in_block.call(0, described_class::AuthenticationError.new)).to be_nil
     end
