@@ -63,6 +63,7 @@ import ReviewForm from './elements/review_form'
 import ShowOnValue from './elements/show_on_value'
 import ToggleClasses from './elements/toggle_classes'
 import AutosizeField from './elements/autosize_field'
+import SignatureDetails from './elements/signature_details'
 import GoogleDriveFilePicker from './elements/google_drive_file_picker'
 import OpenModal from './elements/open_modal'
 import BarChart from './elements/bar_chart'
@@ -190,6 +191,7 @@ safeRegisterElement('review-form', ReviewForm)
 safeRegisterElement('show-on-value', ShowOnValue)
 safeRegisterElement('toggle-classes', ToggleClasses)
 safeRegisterElement('autosize-field', AutosizeField)
+safeRegisterElement('signature-details', SignatureDetails)
 safeRegisterElement('google-drive-file-picker', GoogleDriveFilePicker)
 safeRegisterElement('open-modal', OpenModal)
 safeRegisterElement('bar-chart', BarChart)

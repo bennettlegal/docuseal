@@ -11,6 +11,7 @@ import PageContainer from './elements/page_container'
 import SubmitForm from './elements/submit_form'
 import ModalButton from './elements/modal_button'
 import NativeAction from './elements/native_action'
+import SignatureDetails from './elements/signature_details'
 
 const safeRegisterElement = (name, element, options = {}) => !window.customElements.get(name) && window.customElements.define(name, element, options)
 
@@ -22,6 +23,7 @@ safeRegisterElement('page-container', PageContainer)
 safeRegisterElement('submit-form', SubmitForm)
 safeRegisterElement('modal-button', ModalButton)
 safeRegisterElement('native-action', NativeAction)
+safeRegisterElement('signature-details', SignatureDetails)
 safeRegisterElement('submission-form', class extends HTMLElement {
   connectedCallback () {
     this.appElem = document.createElement('div')

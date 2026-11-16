@@ -58,5 +58,8 @@ RSpec.describe 'submissions/_value' do
     signature = html.at_css('field-value > div')
     expect(signature['class']).to include('overflow-hidden')
     expect(signature.css('> div').pluck('class')).to all(include('min-w-0', 'overflow-hidden'))
+    details = signature.at_css('signature-details')
+    expect(details['class']).to include('min-w-0', 'min-h-0', 'h-full', 'overflow-hidden')
+    expect(details.at_css('.uppercase')['class']).not_to include('truncate')
   end
 end
