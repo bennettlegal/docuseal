@@ -389,40 +389,11 @@ module Submissions
 
               canvas.image(io, at: [image_x, image_y], width: image_width, height: image_height)
 
-              id_string = "ID: #{attachment.uuid}".upcase
-
-              loop do
-                text = HexaPDF::Layout::TextFragment.create(id_string, font:, font_size: base_font_size)
-
-                result = layouter.fit([text], half_width, base_font_size / 0.65)
-
-                break if result.status == :success
-
-                id_string = "#{id_string.delete_suffix('...')[0..-2]}..."
-
-                break if id_string.length < 8
-              end
-
-              string = [id_string, reason_string].join("\n")
-
-              loop do
-                text = HexaPDF::Layout::TextFragment.create(string, font:, font_size: base_font_size)
-
-                result = layouter.fit([text], half_width, area_h)
-
-                break if result.status == :success
-
-                base_font_size *= 0.9
-
-                break if base_font_size < 2
-              end
-
-              text = HexaPDF::Layout::TextFragment.create(string, font:, font_size: base_font_size)
-
-              text_x = area_x + half_width
-              text_y = height - area_y
-
-              layouter.fit([text], half_width, area_h).draw(canvas, text_x + TEXT_LEFT_MARGIN, text_y)
+              string = ["ID: #{attachment.uuid}".upcase, reason_string].join("\n")
+              result = BennettSignatureDetailsFit.fit(string, font:, font_size: base_font_size,
+                                                              width: half_width - (TEXT_LEFT_MARGIN * 2),
+                                                              height: area_h - (TEXT_TOP_MARGIN * 2))
+              result.draw(canvas, area_x + half_width + TEXT_LEFT_MARGIN, height - area_y - TEXT_TOP_MARGIN)
             else
               reason_text = HexaPDF::Layout::TextFragment.create(reason_string,
                                                                  font:,

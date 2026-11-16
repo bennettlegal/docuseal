@@ -11,31 +11,33 @@
     <% with_signature_id = signature_id_preference.in?([true, false]) ? signature_id_preference : local_assigns[:with_signature_id] %>
     <% with_signature_details = with_signature_id || field.dig('preferences', 'reason_field_uuid').present? %>
     <% is_narrow = area['h'].to_f.positive? && ((area['w'].to_f * local_assigns[:page_width]) / (area['h'].to_f * local_assigns[:page_height])) > 4.5 %>
-    <div class="flex justify-between w-full h-full gap-1 overflow-hidden <%= is_narrow && with_signature_details ? 'flex-row' : 'flex-col' %>">
-      <div class="flex min-w-0 min-h-0 overflow-hidden <%= is_narrow && with_signature_details ? 'w-1/2' : 'flex-grow' %>" style="min-height: 50%">
-        <img class="object-contain mx-auto" src="<%= attachments_index[value].url(time: ActiveStorage::Attachment.service_url_time) %>" alt="<%= field['name'].presence || field['title'].presence || field['type'] %>">
+    <div class="flex justify-between w-full h-full overflow-hidden <%= is_narrow && with_signature_details ? 'flex-row' : 'flex-col' %>">
+      <div class="flex min-w-0 min-h-0 overflow-hidden <%= with_signature_details ? (is_narrow ? 'w-1/2 h-full' : 'w-full h-1/2') : 'flex-grow' %>">
+        <img class="object-contain mx-auto w-full h-full" src="<%= attachments_index[value].url(time: ActiveStorage::Attachment.service_url_time) %>" alt="<%= field['name'].presence || field['title'].presence || field['type'] %>">
       </div>
       <% if with_signature_details && attachment = attachments_index[value] %>
-        <div class="min-w-0 overflow-hidden break-words text-[1vw] lg:text-[0.55rem] lg:leading-[0.65rem] <%= is_narrow ? 'w-1/2' : 'w-full' %>">
-          <div class="truncate uppercase">
-            ID: <%= attachment.uuid %>
-          </div>
-          <% if local_assigns[:with_signature_id_reason] != false %>
-            <div>
-              <% reason_value = submitter.values[field.dig('preferences', 'reason_field_uuid')].presence %>
-              <% if reason_value %><%= t('reason') %>: <% end %><%= reason_value || t('digitally_signed_by') %> <%= submitter.name %>
-              <% if submitter.email %>
-                &lt;<%= submitter.email %>&gt;
-              <% end %>
+        <signature-details class="block min-w-0 min-h-0 overflow-hidden <%= is_narrow ? 'w-1/2 h-full' : 'w-full h-1/2' %>" style="font-size: 55.5556%; line-height: 1.1; padding: 1px; box-sizing: border-box">
+          <div style="overflow-wrap: anywhere">
+            <div class="uppercase">
+              ID: <%= attachment.uuid %>
             </div>
-          <% end %>
-          <div>
-            <% timezone = local_assigns[:with_submitter_timezone] ? (submitter.timezone || local_assigns[:timezone]) : local_assigns[:timezone] %>
-            <% time_format = local_assigns[:with_timestamp_seconds] ? :detailed : :long %>
-            <% signature_timestamp = (local_assigns[:with_signature_id_completed_at] ? submitter.completed_at : nil) || attachment.created_at %>
-            <%= l(signature_timestamp.in_time_zone(timezone), format: time_format, locale: local_assigns[:locale]) %> <%= TimeUtils.timezone_abbr(timezone, signature_timestamp) %>
+            <% if local_assigns[:with_signature_id_reason] != false %>
+              <div>
+                <% reason_value = submitter.values[field.dig('preferences', 'reason_field_uuid')].presence %>
+                <% if reason_value %><%= t('reason') %>: <% end %><%= reason_value || t('digitally_signed_by') %> <%= submitter.name %>
+                <% if submitter.email %>
+                  <div>&lt;<%= submitter.email %>&gt;</div>
+                <% end %>
+              </div>
+            <% end %>
+            <div>
+              <% timezone = local_assigns[:with_submitter_timezone] ? (submitter.timezone || local_assigns[:timezone]) : local_assigns[:timezone] %>
+              <% time_format = local_assigns[:with_timestamp_seconds] ? :detailed : :long %>
+              <% signature_timestamp = (local_assigns[:with_signature_id_completed_at] ? submitter.completed_at : nil) || attachment.created_at %>
+              <%= l(signature_timestamp.in_time_zone(timezone), format: time_format, locale: local_assigns[:locale]) %> <%= TimeUtils.timezone_abbr(timezone, signature_timestamp) %>
+            </div>
           </div>
-        </div>
+        </signature-details>
       <% end %>
     </div>
   <% elsif field['type'].in?(['image', 'initials', 'stamp', 'kba']) && attachments_index[value].image? %>
