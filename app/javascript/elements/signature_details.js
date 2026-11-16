@@ -32,10 +32,23 @@ export default class extends HTMLElement {
     const height = this.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)
     if (width <= 0 || height <= 0) return
 
+    const bounds = this.getBoundingClientRect()
     const maximum = parseFloat(style.fontSize)
     const fits = size => {
       content.style.fontSize = `${size}px`
-      return content.scrollWidth <= Math.floor(width) && content.scrollHeight <= Math.floor(height)
+      if (content.scrollWidth > Math.floor(width) || content.scrollHeight > Math.floor(height)) return false
+
+      // Fonts can draw outside their line boxes even when scrollHeight fits.
+      const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT)
+      while (walker.nextNode()) {
+        if (!walker.currentNode.textContent.trim()) continue
+        const range = document.createRange()
+        range.selectNodeContents(walker.currentNode)
+        for (const rect of range.getClientRects()) {
+          if (rect.left < bounds.left || rect.right > bounds.right || rect.top < bounds.top || rect.bottom > bounds.bottom) return false
+        }
+      }
+      return true
     }
     if (fits(maximum)) return
 

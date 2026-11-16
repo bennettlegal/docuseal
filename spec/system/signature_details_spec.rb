@@ -88,6 +88,13 @@ RSpec.describe 'Signature detail fitting' do
         face.load().then(() => done(true));
       JS
       expect(annotation_metrics).to include('inside' => true)
+
+      page.execute_script(<<~JS)
+        const details = document.querySelector('signature-details');
+        details.style.lineHeight = '0.7';
+        details.firstElementChild.append(document.createTextNode(' Font metric regression'));
+      JS
+      expect(annotation_metrics).to include('inside' => true)
     end
   end
 end
