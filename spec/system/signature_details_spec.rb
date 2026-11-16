@@ -78,6 +78,16 @@ RSpec.describe 'Signature detail fitting' do
       metrics = annotation_metrics
       expect(metrics).to include('inside' => true)
       expect(metrics.fetch('text')).to include(identifier, name, email, 'November 16, 2026 at 1:18 PM CST')
+
+      font = Base64.strict_encode64(Rails.public_path.join('fonts/bennett-noto-serif-latin.woff2').binread)
+      page.evaluate_async_script(<<~JS, font)
+        const done = arguments[arguments.length - 1];
+        const face = new FontFace('LateSignatureFont', `url(data:font/woff2;base64,${arguments[0]})`);
+        document.fonts.add(face);
+        document.querySelector('signature-details').firstElementChild.style.fontFamily = 'LateSignatureFont, Arial';
+        face.load().then(() => done(true));
+      JS
+      expect(annotation_metrics).to include('inside' => true)
     end
   end
 end

@@ -5,6 +5,8 @@ export default class extends HTMLElement {
     this.resizeObserver.observe(this)
     this.contentObserver = new MutationObserver(() => this.scheduleFit())
     this.contentObserver.observe(this, { childList: true, subtree: true, characterData: true })
+    this.fontsLoaded = () => this.scheduleFit()
+    document.fonts?.addEventListener('loadingdone', this.fontsLoaded)
     document.fonts?.ready.then(() => { if (this.isConnected) this.scheduleFit() })
     this.scheduleFit()
   }
@@ -12,6 +14,7 @@ export default class extends HTMLElement {
   disconnectedCallback () {
     this.resizeObserver?.disconnect()
     this.contentObserver?.disconnect()
+    document.fonts?.removeEventListener('loadingdone', this.fontsLoaded)
     cancelAnimationFrame(this.frame)
   }
 
