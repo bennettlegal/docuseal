@@ -47,3 +47,5 @@ Anyone receiving this image, or using the service over a network, can get the so
 - 2026-11-13: Fit readonly JUD client FullName text within its existing field rectangle when two printed names are long, preserving the font size for names that already fit and retaining ordinary document rendering.
 
 - 2026-11-14: Server-rendered signature previews honor each field's signature-ID preference, matching the signer component and generated PDF. Preview containers bound legacy signature details to the field rectangle. Existing signed PDFs, document IDs, audit trails and account settings are unchanged.
+
+- 2026-11-16: Optional Microsoft Graph MIME delivery from the dedicated Solar mailbox preserves native signing emails, attachments and links. Uncertain delivery is held for manual review instead of automatically resending. SMTP remains the default until a separately scoped Exchange application is configured and enabled.

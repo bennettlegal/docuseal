@@ -15,6 +15,14 @@ module ActionMailerConfigsInterceptor
       return message
     end
 
+    if BennettGraphDelivery.enabled?
+      message.delivery_method(BennettGraphDelivery)
+      message.from = "Bennett Legal <#{BennettGraphDelivery::MAILBOX}>"
+      message.reply_to = ([BennettGraphDelivery::MAILBOX] + message.reply_to.to_a).uniq
+
+      return message
+    end
+
     if Rails.env.production? && Rails.application.config.action_mailer.delivery_method
       from = ENV.fetch('SMTP_FROM').to_s.split(',').sample
 

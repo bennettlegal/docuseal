@@ -3,6 +3,10 @@
 class SendSubmitterInvitationEmailJob
   include Sidekiq::Job
 
+  sidekiq_retry_in do |_count, error|
+    :kill if error.is_a?(BennettGraphDelivery::UncertainDelivery)
+  end
+
   def perform(params = {})
     submitter = Submitter.find(params['submitter_id'])
 
@@ -28,11 +32,13 @@ class SendSubmitterInvitationEmailJob
 
     Submitters::ValidateSending.call(submitter, mail)
 
-    mail.deliver_now!
+    BennettGraphDelivery.protect_accepted_delivery(mail) do
+      mail.deliver_now!
 
-    SubmissionEvent.create!(submitter:, event_type: 'send_email')
+      SubmissionEvent.create!(submitter:, event_type: 'send_email')
 
-    submitter.sent_at ||= Time.current
-    submitter.save!
+      submitter.sent_at ||= Time.current
+      submitter.save!
+    end
   end
 end
