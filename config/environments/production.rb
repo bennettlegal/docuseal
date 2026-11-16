@@ -77,7 +77,10 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   config.action_mailer.raise_delivery_errors = false
 
-  if ENV['SMTP_ADDRESS']
+  if ENV['BENNETT_GRAPH_MAIL_ENABLED'] == 'true'
+    config.action_mailer.delivery_method = :bennett_graph
+    config.action_mailer.raise_delivery_errors = true
+  elsif ENV['SMTP_ADDRESS']
     config.action_mailer.delivery_method = :smtp
     config.action_mailer.smtp_settings = {
       address: ENV.fetch('SMTP_ADDRESS', nil),
