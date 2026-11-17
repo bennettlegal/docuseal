@@ -6,9 +6,11 @@ class ApplicationMailer < ActionMailer::Base
 
   register_interceptor ActionMailerConfigsInterceptor
   register_interceptor HtmlToPlainTextInterceptor
+  register_interceptor BennettMailArchive
   register_preview_interceptor HtmlToPlainTextInterceptor
 
   register_observer ActionMailerEventsObserver
+  register_observer BennettMailArchive
 
   before_action do
     ActiveStorage::Current.url_options = Docuseal.default_url_options

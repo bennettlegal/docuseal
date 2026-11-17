@@ -2,6 +2,12 @@
 
 This fork builds the production DocuSeal image for Bennett Legal's retainer signing. The branch `bennett-legal` is upstream DocuSeal plus a few normal commits (`bennett/NOTICE.md` lists them), and this folder. Infrastructure (the gateway, the host stack, AWS) lives in the firm's private repository.
 
+## Retained outgoing retainer mail
+
+`BENNETT_MAIL_ARCHIVE_ENABLED=true` enables the SMTP message archive. Deploy this implementation before selecting that setting. It writes submitted MIME, including attachments, plus a SHA-256, envelope recipients and native record context under `$WORKDIR/bennett-mail-archive`. The host's private document volume and existing hourly offsite document sync cover these unique files; no download route or ActiveStorage blob is created. Keep the files private, preserve their unique names and do not add an expiration policy to that backup prefix.
+
+The archive interceptor runs after sender configuration and plain-text generation. An archive-preparation failure stops before SMTP. A separate receipt records completion of the mail delivery callback; receipt failure after submission logs a content-free review message and cannot trigger another send. Prepared messages may be unsent, and neither receipt proves inbox delivery or reading. This feature archives SMTP retainer mail only; it does not backfill old message bodies, export Resend delivery events or change Graph mail, provider selection, recipients or signing links. Accept an offsite restored MIME and its attachment before calling this retention active.
+
 ## Layout
 
 | Path | What it is |

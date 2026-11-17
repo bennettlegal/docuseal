@@ -42,6 +42,8 @@ Each change is a normal commit on `bennett-legal`; `git log upstream/master..ben
 
 ## Source availability
 
+- **Private outgoing retainer email archive** (2026-11-17). An opt-in SMTP interceptor retains submitted MIME, attachments, envelope recipients and record references under the existing private WORKDIR volume before delivery. Separate delivery-callback receipts preserve the distinction between a prepared message and a completed mailer callback; neither asserts inbox delivery. Archive preparation failure prevents submission, while a receipt failure after submission cannot trigger another send. The existing host document backup can retain these unique files without an expiration schedule.
+
 - 2026-11-16: The verified build can restore the exact reviewed PR #25 ancestry after a squash merge, only when the merge leaves the complete source tree unchanged. Changed references, conflicts and source differences stop the build; existing test, smoke, scan and publish gates remain required.
 
 Anyone receiving this image, or using the service over a network, can get the source from the public fork at the commit in the image label. Keep that fork public and keep every published image's commit reachable there (the nightly workflow tags each published commit `verified-<date>-<commit>`).
