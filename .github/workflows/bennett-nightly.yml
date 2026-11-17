@@ -86,7 +86,7 @@ jobs:
       - name: Bennett tests (Ruby 4.0.9, as in the image)
         run: |
           docker run --rm -v "$PWD:/src:ro" -w /src "$RUBY_IMAGE" sh -c \
-            'apk add --no-cache git > /dev/null && git config --global --add safe.directory /src && ruby bennett/test/run.rb'
+            'apk add --no-cache bash git > /dev/null && git config --global --add safe.directory /src && ruby bennett/test/run.rb'
 
       - name: Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
