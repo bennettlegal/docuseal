@@ -426,9 +426,8 @@ module Submissions
               io =
                 StringIO.new(image.resize([scale * 4, 1].select(&:positive?).min).write_to_buffer('.png', strip: true))
 
-              layouter.fit([text], area_w, base_font_size / 0.65)
-                      .draw(canvas, area_x + TEXT_LEFT_MARGIN,
-                            height - area_y - TEXT_TOP_MARGIN - image_height)
+              result.draw(canvas, area_x + TEXT_LEFT_MARGIN,
+                          height - area_y - TEXT_TOP_MARGIN - image_height)
 
               layouter.fit([reason_text], area_w, reason_result.lines.sum(&:height))
                       .draw(canvas, area_x + TEXT_LEFT_MARGIN,

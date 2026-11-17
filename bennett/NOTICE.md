@@ -58,3 +58,5 @@ Anyone receiving this image, or using the service over a network, can get the so
 - 2026-11-16: Synchronize upstream DocuSeal through 3.3.7 (`0dac1abe842798633aac85ff975ec719c39e85dd`), including its ZIP, blob-proxy, timezone, formula and signer-form fixes. Retain Bennett's strict recipient-order checks on every signer mutation and the submission row lock; upstream's completion-only order helper is not selected. Keep the existing Ubuntu 24.04 CI package name (`liblept5`) for the fork's pinned runner. Bennett staff access, email transport, document rendering, attribution and licence terms remain intact.
 
 - 2026-11-16: Include Bash alongside Git in the pinned Alpine Ruby test container so reviewed-history fixtures execute in the native verified release. Release verification and publishing guards are unchanged.
+
+- 2026-11-16: Generate narrower signature annotations from their fitted text result without referring to a block-local variable. Both narrower and wide signature fields retain their existing presentation; completed-document generation is covered with real signature attachments and PDF text readback.
