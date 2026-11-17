@@ -79,6 +79,8 @@ The production server deploys the newest `verified-*` image with `host.py update
 
 For an upstream-sync pull request, use GitHub's **Create a merge commit** option. Squash or rebase merging can copy the updated files while losing the upstream ancestry, causing the nightly to attempt the same merge and conflicts again.
 
+If the interface defaults to squash, use `gh pr merge <PR_NUMBER> --repo bennettlegal/docuseal --merge` after checks pass. For a draft history-repair PR, first run `gh pr ready <PR_NUMBER> --repo bennettlegal/docuseal`.
+
 After merging, fetch both `origin` and `upstream`, then verify `git merge-base --is-ancestor upstream/master origin/bennett-legal` succeeds. For a history-repair PR, preserve its merge commits too; it records an already-reviewed sync without changing application files.
 
 ## Atomic signing and unsigned expiry
