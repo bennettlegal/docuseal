@@ -34,8 +34,18 @@ stop() { # stop REASON FILES...
   exit 1
 }
 
+# PR #25 was reviewed and merged, but squash discarded its upstream parents.
+# Reattach that exact reviewed history only if its merge leaves every current
+# source byte unchanged. This is a work-copy merge; the existing tests, smoke,
+# scan and publish guards still decide whether any commit can be published.
+reviewed_history=01c21875cd7cb0436b48faf2436f3c3fd10c85b2
+if ! git merge-base --is-ancestor "$upstream" HEAD &&
+   ! git merge-base --is-ancestor "$reviewed_history" HEAD 2> /dev/null; then
+  source "$(dirname "${BASH_SOURCE[0]}")/restore-reviewed-history.sh"
+  restore_reviewed_history refs/pull/25/head "$reviewed_history" || stop reviewed-history refs/pull/25/head
+fi
+
 if git merge-base --is-ancestor "$upstream" HEAD; then
-  changed=false
   echo "bennett-legal already contains upstream $branch ${upstream:0:7} ($base_tag)"
 else
   if ! git merge --no-ff --no-edit -m "Merge upstream DocuSeal $branch ${upstream:0:7} ($base_tag)" "$upstream" > /dev/null 2>&1; then
@@ -48,10 +58,11 @@ else
   workflows=$(git diff --name-only "$before" HEAD -- .github/workflows | tr '\n' ' ')
   # shellcheck disable=SC2086
   [ -z "$workflows" ] || stop workflows $workflows
-  changed=true
   echo "Merged upstream $branch ${upstream:0:7} ($base_tag): $(git diff --name-only "$before" HEAD | wc -l | tr -d ' ') files changed"
 fi
 commit=$(git rev-parse HEAD)
+changed=false
+[ "$commit" = "$before" ] || changed=true
 {
   echo "changed=$changed"
   echo "commit=$commit"

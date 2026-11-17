@@ -49,7 +49,7 @@ ruby bennett/test/run.rb
 
 ## Nightly pipeline
 
-`.github/workflows/bennett-nightly.yml` runs at 07:00 UTC and on demand (`gh workflow run bennett-nightly.yml --ref bennett-legal`). The `verify` job, which has no write access to the repository:
+`.github/workflows/bennett-nightly.yml` runs at 07:00 UTC and on demand (`gh workflow run bennett-nightly.yml --ref bennett-legal`). If squash lost the reviewed upstream history, it first restores the exact pinned PR #25 head only when the merge leaves the complete current source tree unchanged. A changed PR reference, source difference or merge conflict stops the run. Existing validation and publication gates remain required. The `verify` job, which has no write access to the repository:
 
 1. Merges upstream `docusealco/docuseal` `master` into a work copy of `bennett-legal`. On a conflict, or if upstream changed workflow files, it stops and opens or updates one issue labelled `upstream-merge`.
 2. Runs the Bennett tests and the browser layout test.

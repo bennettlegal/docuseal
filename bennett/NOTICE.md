@@ -42,6 +42,8 @@ Each change is a normal commit on `bennett-legal`; `git log upstream/master..ben
 
 ## Source availability
 
+- 2026-11-16: The verified build can restore the exact reviewed PR #25 ancestry after a squash merge, only when the merge leaves the complete source tree unchanged. Changed references, conflicts and source differences stop the build; existing test, smoke, scan and publish gates remain required.
+
 Anyone receiving this image, or using the service over a network, can get the source from the public fork at the commit in the image label. Keep that fork public and keep every published image's commit reachable there (the nightly workflow tags each published commit `verified-<date>-<commit>`).
 
 - 2026-11-13: Repair staff submission attributes for Rails HTML validation; read multipart email bodies and current download controls in system tests. Pin native CI runners to Ubuntu 24.04 and apply existing Ruby/ERB style checks to the Bennett layer, retaining standalone Minitest assertions and fixture complexity exemptions.
