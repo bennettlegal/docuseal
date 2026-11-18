@@ -32,7 +32,7 @@ module ActionMailerConfigsInterceptor
         message.from = from
       end
 
-      return message
+      return with_smtp_reply_to(message)
     end
 
     unless Docuseal.multitenant?
@@ -46,6 +46,13 @@ module ActionMailerConfigsInterceptor
         message.delivery_method(:test)
       end
     end
+
+    message
+  end
+
+  def with_smtp_reply_to(message)
+    reply_to = ENV['SMTP_REPLY_TO'].to_s.strip
+    message.reply_to = reply_to unless reply_to.empty?
 
     message
   end
