@@ -181,7 +181,7 @@ async function run() {
       assert.equal(guideState.injected, 0, 'details card rendered markup from field data');
       assert.equal(guideState.rows.length, 3, 'details card must show only this signer\'s locked values');
       assert.equal(guideState.rows[0][1], hostile);
-      assert.ok(guideState.rows[1][1].includes('3,000.00'), `fee not formatted: ${guideState.rows[1][1]}`);
+      assert.equal(guideState.rows[1][1], '$3,000', 'fee not formatted as whole dollars');
       assert.ok(!guideState.rows.some(row => row[1] === 'Someone Else'));
       assert.match(guideState.counter, language === 'es' ? /^Página 1 de 3$/ : /^Page 1 of 3$/);
       await page.locator('.bennett-guide-nav__go').click();
@@ -191,7 +191,22 @@ async function run() {
       assert.ok(Math.abs(navBox.y - (header - 4)) <= 1, `jump bar is not pinned below the title bar: ${navBox.y} vs ${header}`);
       assert.ok(navBox.height >= 48, 'jump control too small');
     }
-    console.log('Signer chrome: 8 verification layouts, 8 interactive step panels, and 4 document geometry controls, and 2 guided-signing checks passed.');
+    // The fee reads as money for every amount JUD sends (the agreement prints
+    // its own "$", so JUD sends "3,000", "0", or "2,750.50"). A comma used to
+    // fall through raw while "0" became "$0.00".
+    const fees = [['3000', '$3,000'], ['3,000', '$3,000'], ['12,500', '$12,500'], ['0', '$0'], ['2,750.50', '$2,750.50'], ['3,00', '3,00']];
+    for (const language of ['en', 'es']) {
+      for (const [sent, shown] of fees) {
+        await page.goto('about:blank');
+        const feeField = [{ uuid: 'fee', submitter_uuid: 'me', name: 'attorney_fee', type: 'text', readonly: true, default_value: sent }];
+        await page.setContent(`<!doctype html><html lang="${language}"><body class="bennett-signer"><main><div id="document-x"><page-container style="display:block;height:900px"></page-container></div>
+          <submission-form data-language="${language}" data-fields="${attr(feeField)}" data-values="${attr({})}" data-submitter="${attr({ uuid: 'me' })}"></submission-form></main></body></html>`);
+        await page.addScriptTag({ content: guideJs });
+        const row = await page.locator('.bennett-guide-details__row dd').textContent();
+        assert.equal(row, shown, `${language} fee "${sent}" shown as "${row}"`);
+      }
+    }
+    console.log('Signer chrome: 8 verification layouts, 8 interactive step panels, and 4 document geometry controls, 2 guided-signing checks, and 12 fee formats passed.');
   } finally {
     await browser.close();
   }
