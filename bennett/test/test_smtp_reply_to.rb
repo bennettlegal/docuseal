@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 require 'minitest/autorun'
-require 'ostruct'
 require_relative '../../lib/action_mailer_configs_interceptor'
 
 # Exercise the interceptor without Rails, a database, dependencies or delivery.
 module Rails
-  def self.env = OpenStruct.new(production?: true)
-  def self.application = OpenStruct.new(config: OpenStruct.new(action_mailer: OpenStruct.new(delivery_method: :smtp)))
+  def self.env = Struct.new(:production?).new(true)
+
+  def self.application
+    Struct.new(:config).new(Struct.new(:action_mailer).new(Struct.new(:delivery_method).new(:smtp)))
+  end
 end
 
 module Docuseal
@@ -18,6 +20,7 @@ module BennettGraphDelivery
   MAILBOX = 'solar@bennettlegal.com'
   class << self
     attr_accessor :enabled
+
     def enabled? = enabled
   end
 end
@@ -28,8 +31,8 @@ module User
 end
 
 class SmtpReplyToTest < Minitest::Test
-  Message = Struct.new(:from, :reply_to, :method) do
-    def delivery_method(value) = self.method = value
+  Message = Struct.new(:from, :reply_to, :delivery_transport) do
+    def delivery_method(value) = self.delivery_transport = value
   end
 
   def setup
@@ -65,7 +68,7 @@ class SmtpReplyToTest < Minitest::Test
     ENV['SMTP_REPLY_TO'] = 'other@example.test'
     BennettGraphDelivery.enabled = true
     ActionMailerConfigsInterceptor.delivering_email(@message)
-    assert_equal BennettGraphDelivery, @message.method
+    assert_equal BennettGraphDelivery, @message.delivery_transport
     assert_equal ['solar@bennettlegal.com', 'lawyer@example.test'], @message.reply_to
   end
 end
