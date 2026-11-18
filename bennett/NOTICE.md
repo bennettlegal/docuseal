@@ -40,6 +40,8 @@ Each change is a normal commit on `bennett-legal`; `git log upstream/master..ben
 
 - **JUD client completed copies** (2026-11-16). A verified, completed JUD client receives the final signed document copy even when the initial native invitation was suppressed because JUD supplied the signing link. Account and template copy settings remain authoritative; ordinary recipient opt-outs, separate staff context, invitation behavior and existing signed document bytes are preserved.
 
+- **Optional SMTP Reply-To** (2026-11-17). In the production configured SMTP path, `SMTP_REPLY_TO` replaces the message Reply-To when nonblank. When unset or blank, existing Reply-To headers are preserved. Graph delivery and sender and recipient routing are unchanged.
+
 ## Source availability
 
 - **Private outgoing retainer email archive** (2026-11-17). An opt-in SMTP interceptor retains submitted MIME, attachments, envelope recipients and record references under the existing private WORKDIR volume before delivery. Separate delivery-callback receipts preserve the distinction between a prepared message and a completed mailer callback; neither asserts inbox delivery. Archive preparation failure prevents submission, while a receipt failure after submission cannot trigger another send. The existing host document backup can retain these unique files without an expiration schedule.

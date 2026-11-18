@@ -32,6 +32,9 @@ module ActionMailerConfigsInterceptor
         message.from = from
       end
 
+      reply_to = ENV['SMTP_REPLY_TO'].to_s.strip
+      message.reply_to = reply_to unless reply_to.empty?
+
       return message
     end
 
