@@ -39,8 +39,16 @@
   }
   function formatValue (kind, raw, lang) {
     var locale = lang === 'es' ? 'es-US' : 'en-US'
-    if (kind === 'fee' && /^\d+(\.\d+)?$/.test(String(raw))) {
-      return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(Number(raw))
+    // JUD sends the fee as the agreement prints it after its own "$": "3,000",
+    // "0", or "2,750.50" when there are cents. Show it as money the same way
+    // for every amount: "$3,000", "$0", "$2,750.50".
+    var fee = String(raw).trim()
+    if (kind === 'fee' && /^(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d{1,2})?$/.test(fee)) {
+      var amount = Number(fee.replace(/,/g, ''))
+      var cents = amount % 1 === 0 ? 0 : 2
+      return new Intl.NumberFormat(locale, {
+        style: 'currency', currency: 'USD', minimumFractionDigits: cents, maximumFractionDigits: cents
+      }).format(amount)
     }
     if (kind === 'date') {
       var date = raw === '{{date}}' ? new Date() : new Date(String(raw) + 'T12:00:00')
