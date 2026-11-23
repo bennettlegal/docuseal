@@ -172,7 +172,7 @@ class JudEmailContextFixture
     label = language == 'es' ? 'Revisar y firmar el contrato' : 'Review and countersign'
     note = 'Synthetic review note about the loan disclosures'
     body = ['**Client signed. Attorney signature required.**', "[#{label}]({submitter.link})",
-            "**Retainer for signature**\n#{record[:context]['client_name']}\n&#36;5&#44;750",
+            "**Retainer for signature**\n#{record[:context]['client_name']}\n**Agreed upfront fee:** &#36;5&#44;750",
             "**Client and intake details**\nExample Lender\n#{note}",
             "[Open in JUD](#{record[:context]['url']})"].join("\n\n")
     message = { 'subject' => "Synthetic review — #{record[:context]['reference']}", 'body' => body }
@@ -187,6 +187,8 @@ class JudEmailContextFixture
     check(URI.parse(action.first['href']).path == routes.submit_form_path(slug: firm.slug), 'CTA opens the firm form')
     check(html.text.include?('$5,750') && text.include?('$5,750') && text.include?(note),
           'terms and note in both parts')
+    check(text.include?('Agreed upfront fee: $5,750') && html.css('td').any? { |td| td.text.strip == '$5,750' },
+          'brief rows keep label and value together')
     client.update!(metadata: client.metadata.merge(marker))
     client_html, client_text = mail(SubmitterMailer.invitation_email(client), record, internal: false)
     check(client_html.text.exclude?(note) && client_text.exclude?(note), 'client invitation omits the attorney brief')

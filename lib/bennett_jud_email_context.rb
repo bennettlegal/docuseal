@@ -74,7 +74,29 @@ module BennettJudEmailContext
     label = action&.match(/\A\[([^\]\r\n]{1,80})\]\(\{submitter\.link\}\)\z/)&.[](1)
     return unless intro.present? && label && rest.present?
 
-    { intro:, label:, sections: rest.split("\n\n") }
+    { intro:, label:, sections: rest.split("\n\n").map { |section| brief_lines(section) } }
+  end
+
+  # Each brief section is JUD-built markdown: an optional **Title** line, then
+  # **Label:** value rows, • notes, and plain or link lines. The letterhead lays
+  # these out as a titled list; every fragment is still rendered by MarkdownToHtml.
+  def brief_lines(section)
+    section.split("\n").filter_map do |line|
+      line = line.strip
+      next if line.empty?
+
+      if (title = line[/\A\*\*([^*]+)\*\*\z/, 1]) && !title.end_with?(':')
+        { kind: :title, text: title }
+      elsif (row = line.match(/\A\*\*([^*]+?):\*\*\s*(.+)\z/))
+        { kind: :row, label: row[1], text: row[2] }
+      elsif (note = line[/\A[•*-]\s+(.+)\z/, 1])
+        { kind: :note, text: note }
+      elsif line.match?(/\A\[[^\]]+\]\([^)\s]+\)\z/)
+        { kind: :link, text: line }
+      else
+        { kind: :text, text: line }
+      end
+    end
   end
 
   def text?(value, maximum)
