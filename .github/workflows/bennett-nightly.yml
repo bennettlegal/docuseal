@@ -136,7 +136,17 @@ jobs:
             upstream.cache-to=type=gha,scope=bennett-upstream,mode=max
 
       - name: Scan (Trivy; fails on HIGH or CRITICAL)
+        id: scan
         run: SCAN_DIR="$RUNNER_TEMP/scan" bennett/ci/scan.sh "$IMAGE"
+
+      # One issue lists every finding (any severity) until a scan is clean,
+      # like the JUD repository's dependency-security issue.
+      - name: Track image findings
+        if: always() && steps.build.outcome == 'success' && github.ref == 'refs/heads/bennett-legal'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SCAN_OUTCOME: ${{ steps.scan.outcome }}
+        run: node bennett/ci/security-issue.mjs "$RUNNER_TEMP/scan/trivy.json" "$SCAN_OUTCOME"
 
       - name: Scan summary
         if: always()

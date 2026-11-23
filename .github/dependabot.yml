@@ -1,0 +1,49 @@
+# Bennett Legal: dependency updates for the bennett-legal fork, like the JUD
+# repository's. Upstream DocuSeal owns Gemfile.lock, yarn.lock and Dockerfile and
+# the nightly merges its releases, so those ecosystems get security updates only
+# (open-pull-requests-limit: 0 turns off routine version PRs; security PRs still
+# open when Dependabot security updates are enabled in the repository settings).
+# Bennett's own smoke-test tooling (bennett/ci) gets routine updates too.
+# Nothing auto-merges: PRs run the normal checks and review.
+version: 2
+updates:
+  - package-ecosystem: bundler
+    directory: /
+    schedule:
+      interval: daily
+      time: "08:15"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 0
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: daily
+      time: "08:15"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 0
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: daily
+      time: "08:15"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 0
+  - package-ecosystem: npm
+    directory: /bennett/ci
+    schedule:
+      interval: daily
+      time: "08:15"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    groups:
+      compatible-updates:
+        update-types: [minor, patch]
+  # Upstream's ci.yml lives next to bennett-nightly.yml, and a routine bump there
+  # would stop the next upstream merge. Security updates only, like the lockfiles.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+      time: "08:15"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 0
