@@ -75,7 +75,7 @@ class JudEmailContextFixture
                       completed_at: finished ? Time.current : nil)
   end
 
-  def mail(delivery, record, internal:, document: false, custom: nil)
+  def mail(delivery, record, internal:, document: false, custom: nil, attorney_brief: false)
     message = delivery.message
     HtmlToPlainTextInterceptor.process(message)
     message = Mail.read_from_string(message.to_s)
@@ -84,8 +84,9 @@ class JudEmailContextFixture
     check(html.text.include?(custom), 'custom body retained') if custom
     check_context(message, html, text, record, internal:)
     check_links(html, record)
-    check_artwork(message, html, text, document:)
+    check_artwork(message, html, text, document:, attorney_brief:)
     @messages += 1
+    [html, text]
   end
 
   def check_links(html, record)
@@ -124,9 +125,11 @@ class JudEmailContextFixture
     end
   end
 
-  def check_artwork(message, html, text, document:)
+  def check_artwork(message, html, text, document:, attorney_brief:)
     check(html.text.include?('DocuSeal'), 'visible attribution')
-    check(html.css('img').size == 6 && html.css('img').all? { |img| img['src'].start_with?('cid:') }, 'inline artwork')
+    count = attorney_brief ? 1 : 6
+    images = html.css('img')
+    check(images.size == count && images.all? { |img| img['src'].start_with?('cid:') }, 'inline artwork')
     if document
       check(message.attachments['synthetic-document.pdf']&.body&.decoded == '%PDF synthetic JUD email fixture',
             'signed attachment retained')
@@ -161,6 +164,34 @@ class JudEmailContextFixture
     preferences = Submitters.normalize_preferences(@account, @user, { 'message' => message })
     record[:firm].update!(preferences: record[:firm].preferences.merge(preferences))
     mail(SubmitterMailer.invitation_email(record[:firm]), record, internal: true, custom: 'Synthetic invitation body')
+  end
+
+  def attorney_brief_invitation(record, language)
+    firm = record[:firm]
+    client = record[:client]
+    label = language == 'es' ? 'Revisar y firmar el contrato' : 'Review and countersign'
+    note = 'Synthetic review note about the loan disclosures'
+    body = ['**Client signed. Attorney signature required.**', "[#{label}]({submitter.link})",
+            "**Retainer for signature**\n#{record[:context]['client_name']}\n**Agreed upfront fee:** &#36;5&#44;750",
+            "**Client and intake details**\nExample Lender\n#{note}",
+            "[Open in JUD](#{record[:context]['url']})"].join("\n\n")
+    message = { 'subject' => "Synthetic review — #{record[:context]['reference']}", 'body' => body }
+    preferences = Submitters.normalize_preferences(@account, @user, { 'message' => message })
+    marker = { 'bennett_attorney_brief' => BennettJudEmailContext::BRIEF_VERSION }
+    firm.update!(preferences: firm.preferences.merge(preferences), metadata: firm.metadata.merge(marker))
+    html, text = mail(SubmitterMailer.invitation_email(firm), record,
+                      internal: true, custom: 'Example Lender', attorney_brief: true)
+    action = html.css('a.cta-link')
+    check(action.one? && action.first.text.include?(label), 'one branded attorney signing action')
+    routes = Rails.application.routes.url_helpers
+    check(URI.parse(action.first['href']).path == routes.submit_form_path(slug: firm.slug), 'CTA opens the firm form')
+    check(html.text.include?('$5,750') && text.include?('$5,750') && text.include?(note),
+          'terms and note in both parts')
+    check(text.include?('Agreed upfront fee: $5,750') && html.css('td').any? { |td| td.text.strip == '$5,750' },
+          'brief rows keep label and value together')
+    client.update!(metadata: client.metadata.merge(marker))
+    client_html, client_text = mail(SubmitterMailer.invitation_email(client), record, internal: false)
+    check(client_html.text.exclude?(note) && client_text.exclude?(note), 'client invitation omits the attorney brief')
   end
 
   def custom_body_matrix(record)
@@ -269,6 +300,7 @@ class JudEmailContextFixture
         record = build(language, kind)
         recipient_matrix(record)
         custom_invitation(record)
+        attorney_brief_invitation(record, language)
         custom_body_matrix(record)
         grouping(record)
         literal_text(record)

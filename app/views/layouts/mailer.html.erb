@@ -8,9 +8,13 @@
 <% es = I18n.locale.to_s.start_with?('es') %>
 <% logo_url = attachments['bennett-mail-footer-logo.png'].url %>
 <% signing = controller.is_a?(SubmitterMailer) || controller.is_a?(TemplateMailer) %>
+<% attorney_review = content_for?(:bennett_attorney_review) %>
+<% attribution = render partial: 'shared/mailer_attribution' %>
 <%# Staff notices (completed, declined) and account mail carry the address only. %>
 <% to_signer = signing && !controller.action_name.in?(%w[completed_email declined_email]) %>
-<% eyebrow = if signing
+<% eyebrow = if attorney_review
+               es ? 'REVISIÓN DEL ABOGADO' : 'ATTORNEY REVIEW'
+             elsif signing
                es ? 'CONTRATO DE SERVICIOS LEGALES' : 'RETAINER AGREEMENT'
              else
                es ? 'FIRMA DE DOCUMENTOS' : 'DOCUMENT SIGNING'
@@ -52,6 +56,7 @@
       a[x-apple-data-detectors]{color:inherit!important;text-decoration:inherit!important}
       <%# Links that upstream bodies leave unstyled; inline colours (button, phone) still win. %>
       .email-text a{color:#365368}
+      .email-review-heading p,.email-review-section p{margin:0}
       @media (prefers-color-scheme:dark){.email-text a{color:#e6cc8e}}
       [data-ogsc] .email-text a,[data-ogsb] .email-text a{color:#e6cc8e}
       @media screen and (min-width:601px){.inset{padding-left:48px!important;padding-right:48px!important}.outer{padding:28px 12px!important}.footer-logo{display:table-cell!important;width:43%!important;padding:0 24px 0 0!important}.footer-details{display:table-cell!important;width:auto!important;padding:3px 0 0!important}.contact-footer{padding-left:36px!important;padding-right:36px!important}}
@@ -69,7 +74,7 @@
           <table role="presentation" width="680" cellspacing="0" cellpadding="0" border="0" class="email-paper" bgcolor="#fcfaf5" style="width:100%;max-width:680px;background-color:#fcfaf5;">
             <tr>
               <td class="inset email-header navy-surface" bgcolor="#001a2d" style="padding:28px 24px 0;text-align:center;background-color:#001a2d;background-image:linear-gradient(#001a2d,#001a2d);">
-                <!-- start text/html --><a href="https://bennettlegal.com/" style="display:inline-block;margin:0 auto 24px;text-decoration:none;"><img src="<%= logo_url %>" alt="Bennett Legal" width="216" style="display:block;width:216px;max-width:100%;height:auto;border:0;color:#ffffff;background-color:#001a2d;"></a><!-- end text/html -->
+                <!-- start text/html --><a href="https://bennettlegal.com/" style="display:inline-block;margin:0 auto <%= attorney_review ? '14px' : '24px' %>;text-decoration:none;"><img src="<%= logo_url %>" alt="Bennett Legal" width="<%= attorney_review ? 164 : 216 %>" style="display:block;width:<%= attorney_review ? 164 : 216 %>px;max-width:100%;height:auto;border:0;color:#ffffff;background-color:#001a2d;"></a><!-- end text/html -->
                 <div class="email-rule" style="border-bottom:1px solid #d4c395;text-align:left;"><p class="video-kicker" style="margin:0 0 16px;font:bold 10px/1.6 Arial,sans-serif;letter-spacing:2.2px;color:#d5b05b;"><span class="gmail-screen" style="display:inline-block;"><span class="gmail-difference" style="display:inline-block;"><%= eyebrow %></span></span></p></div>
               </td>
             </tr>
@@ -78,6 +83,13 @@
                 <%= yield %>
               </td>
             </tr>
+            <% if attorney_review %>
+            <tr>
+              <td class="inset navy-surface" bgcolor="#001a2d" style="padding:18px 24px;background-color:#001a2d;">
+                <%= attribution %>
+              </td>
+            </tr>
+            <% else %>
             <tr>
               <td class="inset email-disclosure" bgcolor="#efefed" style="padding:25px 24px;color:#596572;font:11px/1.65 Arial,sans-serif;">
                 <% if to_signer %>
@@ -100,12 +112,13 @@
                   <!-- end text/html -->
                   <tr>
                     <td colspan="2" style="padding:16px 0 0;">
-                      <%= render partial: 'shared/mailer_attribution' %>
+                      <%= attribution %>
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
+            <% end %>
           </table>
         </td>
       </tr>
