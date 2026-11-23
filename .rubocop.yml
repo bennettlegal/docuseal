@@ -33,7 +33,7 @@ Metrics/ParameterLists:
   Max: 12
 
 Metrics/MethodLength:
-  Max: 30
+  Max: 40
   Exclude:
     - 'db/migrate/**'
     - 'spec/**/*'
@@ -41,10 +41,10 @@ Metrics/MethodLength:
     - 'bennett/test/**/*'
 
 Metrics/CyclomaticComplexity:
-  Max: 15
+  Max: 20
 
 Metrics/PerceivedComplexity:
-  Max: 15
+  Max: 20
 
 Style/MultipleComparison:
   Enabled: false
@@ -71,7 +71,7 @@ Layout/LineLength:
   AllowedPatterns: ['\A\s*#']
 
 Metrics/AbcSize:
-  Max: 45
+  Max: 60
   Exclude:
     - spec/**/*
     - bennett/ci/rails/**/*

@@ -12,7 +12,7 @@ jobs:
       - name: Install Ruby
         uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
         with:
-          ruby-version: 4.0.9
+          ruby-version: 4.0.10
       - name: Cache gems
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -37,7 +37,7 @@ jobs:
       - name: Install Ruby
         uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
         with:
-          ruby-version: 4.0.9
+          ruby-version: 4.0.10
       - name: Cache gems
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -89,7 +89,7 @@ jobs:
       - name: Install Ruby
         uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1
         with:
-          ruby-version: 4.0.9
+          ruby-version: 4.0.10
       - name: Cache gems
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     container:
-      image: ruby:4.0.9-alpine
+      image: ruby:4.0.10-alpine
 
     services:
       postgres:
