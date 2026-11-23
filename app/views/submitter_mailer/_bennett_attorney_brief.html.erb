@@ -1,0 +1,22 @@
+<% es = I18n.locale.to_s.start_with?('es') %>
+<% content_for :bennett_attorney_review, 'true' %>
+<% content_for :bennett_preview, es ? 'Contrato listo para su revisión y firma.' : 'Retainer ready for attorney review and signature.' %>
+<div class="email-heading email-review-heading" style="font:600 20px/1.4 Arial,Helvetica,sans-serif;color:#001a2d;">
+  <%= render 'custom_content', content: brief[:intro], submitter: submitter %>
+</div>
+<%= render 'bennett_button', label: brief[:label], url: ReplaceEmailVariables.call('{submitter.link}', submitter: submitter) %>
+<% brief[:sections].each_with_index do |section, index| %>
+  <% if index.zero? %>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td class="email-callout email-review-section" bgcolor="#f6f0e2" style="padding:13px 18px;background-color:#f6f0e2;border-left:3px solid #aa8637;">
+          <%= render 'custom_content', content: section, submitter: submitter %>
+        </td>
+      </tr>
+    </table>
+  <% else %>
+    <div class="email-rule email-review-section" style="border-top:1px solid #e2d9c6;margin-top:18px;padding-top:16px;">
+      <%= render 'custom_content', content: section, submitter: submitter %>
+    </div>
+  <% end %>
+<% end %>

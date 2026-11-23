@@ -64,3 +64,4 @@ Anyone receiving this image, or using the service over a network, can get the so
 - 2026-11-16: Include Bash alongside Git in the pinned Alpine Ruby test container so reviewed-history fixtures execute in the native verified release. Release verification and publishing guards are unchanged.
 
 - 2026-11-16: Generate narrower signature annotations from their fitted text result without referring to a block-local variable. Both narrower and wide signature fields retain their existing presentation; completed-document generation is covered with real signature attachments and PDF text readback.
+- **Attorney retainer briefing layout** (2026-11-23). Firm invitations with a verified JUD recipient and a versioned briefing message use the existing letterhead and signing button. The custom body continues through the same sanitized renderer and plain-text mail path. Ordinary invitations, client mail and signing records retain their existing behavior.

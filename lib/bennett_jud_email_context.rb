@@ -6,6 +6,7 @@ require 'uri'
 # The context is informational; it never grants access or changes recipients.
 module BennettJudEmailContext
   VERSION = 'jud-retainer-email/1'
+  BRIEF_VERSION = 'jud-attorney-brief/1'
   UUID = /\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/i
   KEYS = %w[client_name issuance_id record_type reference url version].freeze
 
@@ -62,6 +63,18 @@ module BennettJudEmailContext
     return subject unless context && subject.to_s.exclude?(context[:reference])
 
     "#{subject} — #{context[:reference]}"
+  end
+
+  def attorney_brief(submitter, context, body)
+    return unless context && context[:firm_uuid] == submitter.uuid &&
+                  context[:firm_email] == submitter.email&.downcase &&
+                  submitter.metadata&.dig('bennett_attorney_brief') == BRIEF_VERSION
+
+    intro, action, rest = body.to_s.split("\n\n", 3)
+    label = action&.match(/\A\[([^\]\r\n]{1,80})\]\(\{submitter\.link\}\)\z/)&.[](1)
+    return unless intro.present? && label && rest.present?
+
+    { intro:, label:, sections: rest.split("\n\n") }
   end
 
   def text?(value, maximum)

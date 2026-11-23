@@ -1,4 +1,7 @@
-<% if @body.present? %>
+<% brief = BennettJudEmailContext.attorney_brief(@submitter, @bennett_jud_context, @body) %>
+<% if brief %>
+  <%= render 'bennett_attorney_brief', brief: brief, submitter: @submitter %>
+<% elsif @body.present? %>
   <%= render 'custom_content', content: @body, submitter: @submitter %>
   <% if !@body.match?(ReplaceEmailVariables::SUBMITTER_LINK) && !@body.match?(ReplaceEmailVariables::SUBMITTER_ID) && !@body.match?(ReplaceEmailVariables::SUBMISSION_LINK) && !@body.match?(ReplaceEmailVariables::TEMPLATE_ID) && !@submitter.submission.source.in?(%w[api embed]) %>
     <p><%= link_to nil, submit_form_url(slug: @submitter.slug, t: SubmissionEvents.build_tracking_param(@submitter, 'click_email'), host: @custom_domain || ENV.fetch('EMAIL_HOST', Docuseal.default_url_options[:host])) %></p>
