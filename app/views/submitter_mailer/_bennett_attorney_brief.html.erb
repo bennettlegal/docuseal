@@ -5,7 +5,7 @@
 <% es = I18n.locale.to_s.start_with?('es') %>
 <% content_for :bennett_attorney_review, 'true' %>
 <% content_for :bennett_preview, es ? 'Contrato listo para su revisión y firma.' : 'Retainer ready for attorney review and signature.' %>
-<% inline = ->(md) { MarkdownToHtml.call(ReplaceEmailVariables.call(md, submitter:)).to_str.sub(/\A<p>/, '').sub(%r{</p>\z}, '').html_safe } %>
+<% inline = ->(md) { MarkdownToHtml.call(ReplaceEmailVariables.call(md, submitter:)).to_str.delete_prefix('<p>').delete_suffix('</p>').html_safe } %>
 <div class="email-heading email-review-heading" style="margin:0;font:22px/1.4 Georgia,'Times New Roman',serif;color:#001a2d;">
   <%= render 'custom_content', content: brief[:intro], submitter: submitter %>
 </div>
