@@ -59,7 +59,7 @@ ruby bennett/test/run.rb
 
 1. Merges upstream `docusealco/docuseal` `master` into a work copy of `bennett-legal`. On a conflict, or if upstream changed workflow files, it stops and opens or updates one issue labelled `upstream-merge`.
 2. Runs the Bennett tests and the browser layout test.
-3. Builds the image for linux/amd64 and scans it with Trivy. It fails on any CRITICAL finding that `ci/trivyignore.yaml` does not explicitly accept (each entry is scoped and expires).
+3. Builds the image for linux/amd64 and scans it with Trivy. It fails on any HIGH or CRITICAL finding. `ci/trivyignore.yaml` stays empty: findings are fixed, not accepted.
 4. Runs `ci/run-smoke.sh`: postgres, valkey, the new image and the production gateway image (pulled from ECR by digest), configured like production (non-root, read-only, no capabilities, internal data network). It bootstraps a synthetic account the way the host's `bootstrap.rb` does, then acts as JUD, a visitor and two signers (`ci/smoke.mjs`):
    - every DocuSeal API call JUD makes, with JUD's headers and the checks JUD applies to the answers (template representation, PDF bytes, clone, submission fields, external-ID lookup, invite, expiry);
    - the practice-stamp `PUT /api/templates/:id` and its re-read;
@@ -79,7 +79,7 @@ The production server deploys the newest `verified-*` image with `host.py update
 - **Merge issue:** merge by hand as the issue says, run the tests, push. The next passing run closes the issue.
 - **Tests:** `source_check.rb` failing means a merge lost a Bennett change; `test_storage.rb` failing means upstream changed `config/storage.yml` (carry the change into `bennett/storage.yml`).
 - **Smoke test:** the artifact `smoke-test-<run>` has `results.json`, screenshots and the stack's logs. `template representation matches the pinned one` failing means DocuSeal now returns templates differently than the version JUD enrolled its templates on; every approved template's pinned hash in JUD (`LIVE_TEMPLATE_DRIFT`) would drift, so update JUD before `ci/expected/template-projection.json`. The pinned file was recorded from the production image (`bennett-docuseal@sha256:e2dc9ab7…`, DocuSeal 3.3.4) on 2026-11-03.
-- **Trivy:** take the fix (often it is already in the next upstream release), or add a scoped, expiring entry to `ci/trivyignore.yaml` with the reason.
+- **Trivy:** fix it in the image. Take the upstream fix or a newer dependency, or remove or upgrade the vulnerable package in `Dockerfile.bennett` (as with Ruby's built-in json). Don't add exceptions to `ci/trivyignore.yaml` without the owner's sign-off.
 
 ### Preserve upstream merge history
 

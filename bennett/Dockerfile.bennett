@@ -8,10 +8,21 @@
 FROM upstream
 
 # Take current Alpine security fixes for everything installed. The nightly
-# build scans the result and refuses CRITICAL findings before publishing.
+# build scans the result and refuses HIGH and CRITICAL findings before publishing.
 # Create the folders first: COPY --chmod would give new folders the files'
 # 0644, which the runtime user (uid 2000) cannot enter.
 RUN apk upgrade --no-cache && install -d -m 0755 /opt/docuseal /etc/docuseal
+
+# Ruby ships a built-in ("default") json gem that trails security fixes
+# (CVE-2026-33210 in 2.18.x). Remove it instead of accepting it: the app and
+# launch.rb then load the bundle's json from Gemfile.lock. The build fails if
+# a plain require 'json' does not resolve to that bundled, patched copy.
+RUN ruby -rfileutils -e 'lib, arch = RbConfig::CONFIG.values_at("rubylibdir", "archdir"); \
+      FileUtils.rm_rf([File.join(lib, "json.rb"), File.join(lib, "json"), File.join(arch, "json")] + \
+                      Dir[File.join(Gem.default_specifications_dir, "json-*.gemspec")])' && \
+    ruby -e 'require "json"; spec = Gem.loaded_specs.fetch("json"); \
+      abort("json #{spec.version} at #{spec.gem_dir}") unless spec.version >= Gem::Version.new("2.19.2") && \
+        spec.gem_dir.start_with?("/usr/local/bundle/") && JSON.generate(ok: true) == %({"ok":true})'
 
 # Public AWS RDS trust anchors (ca-provenance.json), not a private key.
 COPY --chmod=0644 rds-global-bundle.pem /etc/docuseal/rds-global-bundle.pem

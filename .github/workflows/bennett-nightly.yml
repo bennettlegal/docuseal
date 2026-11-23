@@ -135,7 +135,7 @@ jobs:
             upstream.cache-from=type=gha,scope=bennett-upstream
             upstream.cache-to=type=gha,scope=bennett-upstream,mode=max
 
-      - name: Scan (Trivy; fails on CRITICAL)
+      - name: Scan (Trivy; fails on HIGH or CRITICAL)
         run: SCAN_DIR="$RUNNER_TEMP/scan" bennett/ci/scan.sh "$IMAGE"
 
       - name: Scan summary

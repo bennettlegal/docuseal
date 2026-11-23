@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Scan the built image with Trivy, from a saved tarball (the scanner never
-# gets the Docker socket). Fails on any CRITICAL finding that trivyignore.yaml
-# does not explicitly accept. Report: $SCAN_DIR (trivy.json, trivy.txt, summary.md).
+# gets the Docker socket). Fails on any HIGH or CRITICAL finding. Fix findings
+# in the image (bennett/Dockerfile.bennett); trivyignore.yaml stays empty. Report: $SCAN_DIR (trivy.json, trivy.txt, summary.md).
 #   bennett/ci/scan.sh IMAGE
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
@@ -13,12 +13,12 @@ docker save "$image" -o "$dir/image.tar"
 cp "$here/trivyignore.yaml" "$dir/trivyignore.yaml"
 run() { docker run --rm -v "$dir:/scan" -v bennett-trivy-cache:/root/.cache/trivy "$trivy" image --input /scan/image.tar --scanners vuln "$@"; }
 
-# Every severity, for the record (no ignore file: accepted findings stay visible).
+# Every severity, for the record.
 run --format json --output /scan/trivy.json --quiet
 run --skip-db-update --format table --output /scan/trivy.txt --quiet
 # The gate.
 set +e
-run --skip-db-update --severity CRITICAL --exit-code 1 --ignorefile /scan/trivyignore.yaml --format table --output /scan/critical.txt --quiet
+run --skip-db-update --severity HIGH,CRITICAL --exit-code 1 --ignorefile /scan/trivyignore.yaml --format table --output /scan/critical.txt --quiet
 gate=$?
 set -e
 
@@ -34,7 +34,7 @@ node -e '
   }
   const db = report.Trivy?.Version ?? "";
   fs.writeFileSync(dir + "/summary.md", `### Trivy ${db}: C ${counts.CRITICAL} / H ${counts.HIGH} / M ${counts.MEDIUM} / L ${counts.LOW} / U ${counts.UNKNOWN}\n\n` +
-    `libexpat: ${process.argv[2]}. Gate: ${process.argv[3] === "0" ? "passed" : "**FAILED**"} (CRITICAL, less bennett/ci/trivyignore.yaml).\n\n` +
+    `libexpat: ${process.argv[2]}. Gate: ${process.argv[3] === "0" ? "passed" : "**FAILED**"} (HIGH and CRITICAL).\n\n` +
     (notable.length ? `| Severity | ID | Package | Fixed in | Where |\n|---|---|---|---|---|\n${notable.join("\n")}\n` : "") + "\n");
   console.log(fs.readFileSync(dir + "/summary.md", "utf8"));' "$dir" "$libexpat" "$gate"
 cat "$dir/critical.txt"
